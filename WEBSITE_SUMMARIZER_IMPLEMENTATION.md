@@ -15,7 +15,7 @@ The task was to create a detailed implementation plan and working code for a mul
 
 ### Architecture
 
-The solution consists of three main components:
+The solution uses Microsoft Agent Framework's **WorkflowBuilder** to orchestrate executors:
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -24,34 +24,53 @@ The solution consists of three main components:
                      │
                      ▼
 ┌──────────────────────────────────────────────────────────┐
-│              Get Content Agent                           │
+│           Get Content Executor                           │
+│  • Executor with @handler decorator                      │
 │  • Uses get_website_content tool                         │
 │  • Fetches HTML content via HTTP                         │
 │  • Parses with BeautifulSoup                            │
 │  • Extracts clean text                                   │
+│  • Sends to next executor via ctx.send_message()         │
 └────────────────────┬─────────────────────────────────────┘
-                     │ Raw website content
+                     │ Raw website content (via WorkflowContext)
                      ▼
 ┌──────────────────────────────────────────────────────────┐
-│           Summarize Content Agent                        │
+│         Summarize Content Executor                       │
+│  • Executor with @handler decorator                      │
 │  • Analyzes text content                                 │
 │  • Extracts key points                                   │
 │  • Generates bulleted summary                            │
+│  • Yields output via ctx.yield_output()                  │
 └────────────────────┬─────────────────────────────────────┘
                      │
                      ▼
 ┌──────────────────────────────────────────────────────────┐
 │              Bulleted List Summary                       │
+│         (Retrieved via events.get_outputs())             │
 └──────────────────────────────────────────────────────────┘
+```
+
+**WorkflowBuilder Integration:**
+```python
+workflow = (
+    WorkflowBuilder(name="WebsiteSummarizer")
+    .register_executor(lambda: GetContentExecutor(...), name="GetContent")
+    .register_executor(lambda: SummarizeContentExecutor(...), name="Summarize")
+    .add_edge("GetContent", "Summarize")
+    .set_start_executor("GetContent")
+    .build()
+)
 ```
 
 ### Components Created
 
-#### 1. Get Content Agent (`get_content_agent.py`)
+#### 1. Get Content Executor (in `website_summarizer_workflow.py`)
 
-**Purpose**: Retrieves and extracts text content from a website URL.
+**Purpose**: Retrieves and extracts text content from a website URL using the Executor pattern.
 
 **Key Features**:
+- Extends `Executor` base class from agent_framework
+- Uses `@handler` decorator for the process method
 - Implements `get_website_content()` function as a tool
 - Uses `requests` library for HTTP fetching
 - Uses `BeautifulSoup` and `lxml` for HTML parsing
@@ -59,53 +78,101 @@ The solution consists of three main components:
 - Cleans and normalizes whitespace
 - Limits content to 8000 characters to avoid token limits
 - Implements error handling for network and parsing errors
+- Sends output to next executor via `WorkflowContext.send_message()`
 
-**Agent Configuration**:
+**Executor Structure**:
 ```python
-SYSTEM_PROMPT = """You are an agent that retrieves website content. 
-When given a URL, use the get_website_content tool to fetch the content and return it.
-Extract and return the main text content from the website."""
+class GetContentExecutor(Executor):
+    def __init__(self, executor_id: str, credential=None):
+        super().__init__(id=executor_id)
+        self.agent = self.client.create_agent(
+            instructions="...",
+            tools=[get_website_content]
+        )
+    
+    @handler
+    async def process(self, url: str, ctx: WorkflowContext[str]) -> None:
+        response = await self.agent.run(f"Fetch content from: {url}")
+        await ctx.send_message(response.text)
 ```
 
-#### 2. Summarize Content Agent (`summarize_content_agent.py`)
+#### 2. Summarize Content Executor (in `website_summarizer_workflow.py`)
 
-**Purpose**: Creates concise bulleted list summaries of text content.
+**Purpose**: Creates concise bulleted list summaries of text content using the Executor pattern.
 
 **Key Features**:
+- Extends `Executor` base class from agent_framework
+- Uses `@handler` decorator for the process method
 - Specialized system instructions for summarization
 - Configured to output in bulleted list format
 - Focuses on extracting 5-8 key points
 - Emphasizes clarity and brevity
+- Yields final output via `WorkflowContext.yield_output()`
 
-**Agent Configuration**:
+**Executor Structure**:
 ```python
-SYSTEM_PROMPT = """You are an expert content summarizer. Your task is to:
-1. Analyze the provided text content
-2. Extract the key points and main ideas
-3. Create a concise summary in bulleted list format
-4. Focus on the most important information
-5. Keep each bullet point clear and brief
-
-Format your response as a bulleted list using bullet points (•).
-Each bullet should be a complete, standalone point.
-Aim for 5-8 key points that capture the essence of the content."""
+class SummarizeContentExecutor(Executor):
+    def __init__(self, executor_id: str, credential=None):
+        super().__init__(id=executor_id)
+        self.agent = self.client.create_agent(
+            instructions="""You are an expert content summarizer..."""
+        )
+    
+    @handler
+    async def process(self, content: str, ctx: WorkflowContext[str]) -> None:
+        response = await self.agent.run(f"Summarize: {content}")
+        await ctx.yield_output(response.text)
 ```
 
-#### 3. Workflow Orchestrator (`website_summarizer_workflow.py`)
+#### 3. Workflow Orchestrator with WorkflowBuilder (`website_summarizer_workflow.py`)
 
-**Purpose**: Chains the two agents together to create a complete workflow.
+**Purpose**: Uses Microsoft Agent Framework's `WorkflowBuilder` to chain executors together.
 
 **Key Features**:
-- Initializes both agents
-- Manages data flow between agents
-- Provides verbose mode for detailed progress information
-- Handles errors gracefully
+- Uses `WorkflowBuilder` fluent API to construct the workflow
+- Registers executors with factory functions
+- Defines edges between executors for data flow
+- Sets the start executor
+- Builds an immutable `Workflow` object
+- Executes the workflow and retrieves outputs via event system
+- Provides verbose mode for progress information
 
 **Workflow Logic**:
 ```python
-async def run(self, url: str, verbose: bool = True) -> str:
-    # Step 1: Get website content
-    content = await self.get_content_agent.run(url)
+from agent_framework import WorkflowBuilder
+
+class WebsiteSummarizerWorkflow:
+    def __init__(self, credential=None):
+        self.workflow = (
+            WorkflowBuilder(name="WebsiteSummarizer")
+            .register_executor(
+                lambda: GetContentExecutor("get_content", credential),
+                name="GetContent"
+            )
+            .register_executor(
+                lambda: SummarizeContentExecutor("summarize", credential),
+                name="Summarize"
+            )
+            .add_edge("GetContent", "Summarize")
+            .set_start_executor("GetContent")
+            .build()
+        )
+    
+    async def run(self, url: str, verbose: bool = True) -> str:
+        # Run the workflow
+        events = await self.workflow.run(url)
+        
+        # Get outputs
+        outputs = events.get_outputs()
+        return outputs[0] if outputs else ""
+```
+
+**WorkflowBuilder Benefits**:
+- **Declarative**: Clear definition of workflow structure
+- **Reusable**: Executors can be reused in multiple workflows
+- **Type-safe**: Strong typing with WorkflowContext
+- **Event-driven**: Outputs retrieved via event system
+- **Immutable**: Built workflow cannot be modified
     
     # Step 2: Summarize the content
     summary = await self.summarize_agent.run(content)

@@ -2,7 +2,7 @@
 
 ## What is it?
 
-A multi-agent workflow that fetches website content and creates concise bulleted summaries using two specialized AI agents working together.
+A multi-agent workflow that fetches website content and creates concise bulleted summaries using Microsoft Agent Framework's **WorkflowBuilder** to orchestrate two specialized executors.
 
 ## Quick Start
 
@@ -25,19 +25,33 @@ poetry run python examples/website_summarizer_example.py
 ```
 Input: Website URL
     ↓
-[Get Content Agent]
+[Get Content Executor]
+    • Extends Executor with @handler
     • Fetches HTML from URL
     • Extracts clean text
     • Removes scripts, styles, nav
+    • Sends via ctx.send_message()
     ↓
-Raw Text Content
+Raw Text Content (via WorkflowContext)
     ↓
-[Summarize Content Agent]
+[Summarize Content Executor]
+    • Extends Executor with @handler
     • Analyzes content
     • Extracts key points
     • Creates bulleted list
+    • Yields via ctx.yield_output()
     ↓
-Output: Concise Summary
+Output: Concise Summary (via events.get_outputs())
+```
+
+**WorkflowBuilder Pattern:**
+```
+WorkflowBuilder
+  .register_executor(GetContent)
+  .register_executor(Summarize)
+  .add_edge("GetContent", "Summarize")
+  .set_start_executor("GetContent")
+  .build()
 ```
 
 ## Code Example
@@ -47,6 +61,7 @@ from joker_agent.website_summarizer_workflow import WebsiteSummarizerWorkflow
 import asyncio
 
 async def main():
+    # Initialize workflow (uses WorkflowBuilder internally)
     workflow = WebsiteSummarizerWorkflow()
     summary = await workflow.run("https://example.com")
     print(summary)
@@ -57,13 +72,15 @@ asyncio.run(main())
 ## Files Created
 
 ### Core Implementation
-- `src/joker_agent/get_content_agent.py` - Web content fetching agent
-- `src/joker_agent/summarize_content_agent.py` - Text summarization agent
-- `src/joker_agent/website_summarizer_workflow.py` - Workflow orchestrator
+- `src/joker_agent/website_summarizer_workflow.py` - Workflow with WorkflowBuilder, executors, and orchestration
 - `src/joker_agent/run_website_summarizer.py` - Demo runner
 
+### Legacy Files (no longer used directly)
+- `src/joker_agent/get_content_agent.py` - Original agent implementation (preserved for reference)
+- `src/joker_agent/summarize_content_agent.py` - Original agent implementation (preserved for reference)
+
 ### Documentation
-- `WEBSITE_SUMMARIZER_PLAN.md` - Detailed implementation plan (300+ lines)
+- `WEBSITE_SUMMARIZER_PLAN.md` - Detailed implementation plan with WorkflowBuilder (300+ lines)
 - `WEBSITE_SUMMARIZER_IMPLEMENTATION.md` - Implementation summary
 - `examples/website_summarizer_example.py` - Simple usage example
 
@@ -73,6 +90,10 @@ asyncio.run(main())
 - `examples/README.md` - Added examples documentation
 
 ## Key Features
+
+✅ **WorkflowBuilder Integration** - Uses Microsoft Agent Framework's fluent API  
+✅ **Executor Pattern** - Extends Executor with @handler decorators  
+✅ **WorkflowContext** - Type-safe data flow between executors
 
 ✅ **Multi-Agent Orchestration** - Two agents working together  
 ✅ **Tool Integration** - Web scraping as an agent tool  
@@ -89,15 +110,15 @@ asyncio.run(main())
 ## Customization
 
 ### Change Content Length Limit
-Edit `src/joker_agent/get_content_agent.py`:
+Edit `src/joker_agent/website_summarizer_workflow.py`:
 ```python
 MAX_CONTENT_LENGTH = 8000  # Change this value
 ```
 
 ### Change Summary Format
-Edit `src/joker_agent/summarize_content_agent.py`:
+Edit the SummarizeContentExecutor in `src/joker_agent/website_summarizer_workflow.py`:
 ```python
-SYSTEM_PROMPT = """Your custom instructions here"""
+instructions = """Your custom instructions here"""
 ```
 
 ### Process Multiple URLs
@@ -111,29 +132,35 @@ for url in urls:
 
 ## Architecture Highlights
 
-### Agent 1: Get Content
+### Executor 1: Get Content
+- **Type**: Executor with @handler decorator
 - **Tool**: `get_website_content(url: str) -> str`
 - **Libraries**: requests, BeautifulSoup, lxml
 - **Features**: HTML parsing, text extraction, error handling
+- **Output**: Sends to next executor via `ctx.send_message()`
 
-### Agent 2: Summarize Content
+### Executor 2: Summarize Content
+- **Type**: Executor with @handler decorator
 - **No tools** - Pure LLM reasoning
 - **System Prompt**: Specialized for summarization
-- **Output**: Bulleted list format
+- **Output**: Bulleted list via `ctx.yield_output()`
 
-### Workflow Orchestrator
-- **Pattern**: Sequential execution
-- **Data Flow**: Agent 1 → Agent 2
-- **Options**: Verbose mode, error propagation
+### Workflow Orchestrator with WorkflowBuilder
+- **Pattern**: Sequential execution with edges
+- **Builder**: Fluent API (register → edge → build)
+- **Data Flow**: GetContent → Summarize (via WorkflowContext)
+- **Options**: Verbose mode, event-based outputs
 
 ## Best Practices Implemented
 
-1. **Type Hints** - All functions have type annotations
-2. **Docstrings** - Comprehensive documentation
-3. **Constants** - Magic numbers extracted as constants
-4. **Error Handling** - Try-except blocks for network operations
-5. **Security** - Modern user-agent, timeouts, content limits
-6. **Clean Code** - Single responsibility per component
+1. **Executor Pattern** - Extends Executor with @handler
+2. **WorkflowBuilder** - Declarative workflow construction
+3. **Type Hints** - All functions have type annotations
+4. **Docstrings** - Comprehensive documentation
+5. **Constants** - Magic numbers extracted as constants
+6. **Error Handling** - Try-except blocks for network operations
+7. **Security** - Modern user-agent, timeouts, content limits
+8. **Clean Code** - Single responsibility per component
 
 ## Troubleshooting
 

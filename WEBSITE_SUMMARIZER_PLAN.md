@@ -7,96 +7,130 @@ This document provides a detailed plan and implementation guide for creating a m
 
 ### Workflow Components
 
-1. **Get Content Agent**: Retrieves the content from a given website URL
-2. **Summarize Content Agent**: Processes the content and creates a concise bulleted list summary
-3. **Workflow Orchestrator**: Coordinates the execution of both agents in sequence
+1. **Get Content Executor**: Retrieves the content from a given website URL using the Executor pattern
+2. **Summarize Content Executor**: Processes the content and creates a concise bulleted list summary
+3. **Workflow Orchestrator**: Uses Microsoft Agent Framework's `WorkflowBuilder` to coordinate execution
 
 ### Data Flow
 
 ```
 User Input (URL) 
     ↓
-Get Content Agent → Raw Website Content
+Get Content Executor → Raw Website Content (via WorkflowContext)
     ↓
-Summarize Content Agent → Bulleted Summary
+Summarize Content Executor → Bulleted Summary
     ↓
 Final Output
 ```
 
 ## Implementation Details
 
-### 1. Get Content Agent
+### 1. Get Content Executor
 
-**Purpose**: Extract text content from a website URL.
+**Purpose**: Extract text content from a website URL using the Executor pattern.
 
 **Implementation Approach**:
+- Create a `GetContentExecutor` class that extends `Executor`
 - Define a `get_website_content` function that fetches HTML content from a URL
 - Use the `requests` library to retrieve the webpage
 - Parse HTML with `BeautifulSoup` to extract text content
 - Register this function as a tool for the agent
-- Create an agent with system instructions to extract and return website content
+- Use `@handler` decorator to define the processing method
+- Send extracted content to the next executor via `WorkflowContext.send_message()`
 
-**Function Signature**:
+**Executor Structure**:
 ```python
-def get_website_content(url: str) -> str:
-    """Fetch and extract text content from a website URL.
+class GetContentExecutor(Executor):
+    def __init__(self, executor_id: str, credential: Optional[AzureCliCredential] = None):
+        super().__init__(id=executor_id)
+        self.agent = self.client.create_agent(
+            instructions="...",
+            tools=[get_website_content]
+        )
     
-    Args:
-        url: The website URL to fetch content from
-        
-    Returns:
-        The extracted text content from the website
-    """
+    @handler
+    async def process(self, url: str, ctx: WorkflowContext[str]) -> None:
+        response = await self.agent.run(f"Fetch content from: {url}")
+        await ctx.send_message(response.text)
 ```
 
-**Agent Configuration**:
-```python
-SYSTEM_PROMPT = "You are an agent that retrieves website content. When given a URL, use the get_website_content tool to fetch the content and return it."
-```
-
-### 2. Summarize Content Agent
+### 2. Summarize Content Executor
 
 **Purpose**: Generate a concise bulleted list summary of provided text content.
 
 **Implementation Approach**:
-- Create an agent with system instructions focused on summarization
+- Create a `SummarizeContentExecutor` class that extends `Executor`
+- Configure the agent with system instructions focused on summarization
 - Configure the agent to output summaries in bulleted list format
-- Optimize for conciseness and key point extraction
+- Use `@handler` decorator to define the processing method
+- Yield final output via `WorkflowContext.yield_output()`
 
-**Agent Configuration**:
+**Executor Structure**:
 ```python
-SYSTEM_PROMPT = """You are an expert content summarizer. Your task is to:
-1. Analyze the provided text content
-2. Extract the key points and main ideas
-3. Create a concise summary in bulleted list format
-4. Focus on the most important information
-5. Keep each bullet point clear and brief
-"""
+class SummarizeContentExecutor(Executor):
+    def __init__(self, executor_id: str, credential: Optional[AzureCliCredential] = None):
+        super().__init__(id=executor_id)
+        self.agent = self.client.create_agent(
+            instructions="You are an expert content summarizer..."
+        )
+    
+    @handler
+    async def process(self, content: str, ctx: WorkflowContext[str]) -> None:
+        response = await self.agent.run(f"Summarize: {content}")
+        await ctx.yield_output(response.text)
 ```
 
-### 3. Workflow Orchestrator
+### 3. Workflow Orchestrator with WorkflowBuilder
 
-**Purpose**: Chain the two agents together to create a complete workflow.
+**Purpose**: Chain the two executors together using Microsoft Agent Framework's `WorkflowBuilder`.
 
 **Implementation Approach**:
 - Create a `WebsiteSummarizerWorkflow` class
-- Initialize both agents (Get Content and Summarize Content)
-- Implement a `run` method that:
-  1. Takes a URL as input
-  2. Calls the Get Content agent with the URL
-  3. Passes the retrieved content to the Summarize Content agent
-  4. Returns the final summary
+- Use `WorkflowBuilder` to register executors and define edges
+- Configure the workflow with a name and description
+- Set the start executor
+- Build the workflow to create an immutable `Workflow` object
+- Implement a `run` method that executes the workflow and retrieves outputs
 
 **Workflow Class Structure**:
 ```python
+from agent_framework import WorkflowBuilder
+
 class WebsiteSummarizerWorkflow:
-    def __init__(self):
-        self.get_content_agent = GetContentAgent()
-        self.summarize_agent = SummarizeContentAgent()
+    def __init__(self, credential=None):
+        self.credential = credential or AzureCliCredential()
+        
+        # Build the workflow using WorkflowBuilder
+        self.workflow = (
+            WorkflowBuilder(name="WebsiteSummarizer")
+            .register_executor(
+                lambda: GetContentExecutor("get_content", credential=self.credential),
+                name="GetContent"
+            )
+            .register_executor(
+                lambda: SummarizeContentExecutor("summarize", credential=self.credential),
+                name="Summarize"
+            )
+            .add_edge("GetContent", "Summarize")
+            .set_start_executor("GetContent")
+            .build()
+        )
     
     async def run(self, url: str) -> str:
-        # Step 1: Get website content
-        content = await self.get_content_agent.run(url)
+        # Run the workflow
+        events = await self.workflow.run(url)
+        
+        # Get outputs
+        outputs = events.get_outputs()
+        return outputs[0] if outputs else ""
+```
+
+**Key Features of WorkflowBuilder**:
+- **Fluent API**: Chain method calls to build the workflow
+- **Executor Registration**: Register executors with factory functions
+- **Edge Definition**: Define data flow between executors
+- **Immutable Workflow**: Build creates an immutable workflow object
+- **Event-based Output**: Retrieve outputs via event system
         
         # Step 2: Summarize the content
         summary = await self.summarize_agent.run(content)

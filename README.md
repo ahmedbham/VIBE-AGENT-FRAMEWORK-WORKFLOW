@@ -10,12 +10,12 @@ Python agent named **Joker** with system instructions: "you are good at telling 
 ### 2. Weather Agent (Function Calling)
 Python agent that demonstrates **function calling** capabilities using the `AzureOpenAIChatClient`. It includes a `get-weather` function tool that can be invoked by the agent to provide weather information for any location.
 
-### 3. Website Summarizer Workflow (Multi-Agent)
-A **multi-agent workflow** that demonstrates agent orchestration and chaining. This workflow consists of two specialized agents:
-- **Get Content Agent**: Fetches and extracts text content from a website URL using web scraping tools
-- **Summarize Content Agent**: Processes the content and generates a concise bulleted list summary
+### 3. Website Summarizer Workflow (Multi-Agent with WorkflowBuilder)
+A **multi-agent workflow** built with Microsoft Agent Framework's **WorkflowBuilder** that demonstrates advanced agent orchestration. This workflow uses the Executor pattern with two specialized executors:
+- **Get Content Executor**: Fetches and extracts text content from a website URL using web scraping tools
+- **Summarize Content Executor**: Processes the content and generates a concise bulleted list summary
 
-The workflow takes a website URL as input, retrieves its content with the first agent, and passes it to the second agent for summarization.
+The workflow uses `WorkflowBuilder` to register executors, define edges, and orchestrate the sequential execution. Data flows from one executor to the next via `WorkflowContext`.
 
 ## Prerequisites
 - Python >= 3.1.10
@@ -70,14 +70,14 @@ poetry run python -m joker_agent.run_weather_agent
 ```
 This demonstrates function calling with the `get-weather` tool that returns: "The weather in {location} is cloudy with a high of 15°C."
 
-## Run the Website Summarizer Workflow (Multi-Agent Demo)
+## Run the Website Summarizer Workflow (Multi-Agent with WorkflowBuilder)
 ```bash
 poetry run python -m joker_agent.run_website_summarizer
 ```
-This demonstrates a multi-agent workflow where:
-1. The **Get Content Agent** fetches website content from a URL
-2. The **Summarize Content Agent** creates a concise bulleted summary
-3. The workflow orchestrator chains both agents together seamlessly
+This demonstrates a multi-agent workflow built with **WorkflowBuilder** where:
+1. The **Get Content Executor** fetches website content from a URL
+2. The **Summarize Content Executor** creates a concise bulleted summary
+3. The `WorkflowBuilder` orchestrates the executors with edges and manages data flow via `WorkflowContext`
 
 ## Documentation
 

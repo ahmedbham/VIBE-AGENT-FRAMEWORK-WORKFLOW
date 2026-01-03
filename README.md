@@ -10,6 +10,13 @@ Python agent named **Joker** with system instructions: "you are good at telling 
 ### 2. Weather Agent (Function Calling)
 Python agent that demonstrates **function calling** capabilities using the `AzureOpenAIChatClient`. It includes a `get-weather` function tool that can be invoked by the agent to provide weather information for any location.
 
+### 3. Website Summarizer Workflow (Multi-Agent)
+A **multi-agent workflow** that demonstrates agent orchestration and chaining. This workflow consists of two specialized agents:
+- **Get Content Agent**: Fetches and extracts text content from a website URL using web scraping tools
+- **Summarize Content Agent**: Processes the content and generates a concise bulleted list summary
+
+The workflow takes a website URL as input, retrieves its content with the first agent, and passes it to the second agent for summarization.
+
 ## Prerequisites
 - Python >= 3.1.10
 - Poetry
@@ -63,6 +70,15 @@ poetry run python -m joker_agent.run_weather_agent
 ```
 This demonstrates function calling with the `get-weather` tool that returns: "The weather in {location} is cloudy with a high of 15°C."
 
+## Run the Website Summarizer Workflow (Multi-Agent Demo)
+```bash
+poetry run python -m joker_agent.run_website_summarizer
+```
+This demonstrates a multi-agent workflow where:
+1. The **Get Content Agent** fetches website content from a URL
+2. The **Summarize Content Agent** creates a concise bulleted summary
+3. The workflow orchestrator chains both agents together seamlessly
+
 ## Documentation
 
 ### Quick Start
@@ -70,6 +86,7 @@ This demonstrates function calling with the `get-weather` tool that returns: "Th
 
 ### Comprehensive Guides
 - **[WEATHER_AGENT_PLAN.md](WEATHER_AGENT_PLAN.md)** - Detailed plan for implementing agents with function calling
+- **[WEBSITE_SUMMARIZER_PLAN.md](WEBSITE_SUMMARIZER_PLAN.md)** - Detailed plan for implementing multi-agent workflows
 - **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Summary of the implementation and architecture
 - **[examples/README.md](examples/README.md)** - Example scripts and usage patterns
 

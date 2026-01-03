@@ -9,8 +9,11 @@ from agent_framework.azure import AzureOpenAIChatClient
 load_dotenv()
 
 
-# Maximum content length to avoid token limits
+# Configuration constants
 MAX_CONTENT_LENGTH = 8000
+USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+HTML_PARSER = 'lxml'
+AZURE_ENDPOINT = "https://hosted-agent-deployment.services.ai.azure.com"
 
 
 def get_website_content(url: str) -> str:
@@ -25,7 +28,7 @@ def get_website_content(url: str) -> str:
     try:
         # Set a user-agent to avoid being blocked
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            'User-Agent': USER_AGENT
         }
         
         # Fetch the webpage with timeout
@@ -33,7 +36,7 @@ def get_website_content(url: str) -> str:
         response.raise_for_status()
         
         # Parse HTML content
-        soup = BeautifulSoup(response.content, 'lxml')
+        soup = BeautifulSoup(response.content, HTML_PARSER)
         
         # Remove script and style elements
         for script in soup(["script", "style", "nav", "footer", "header"]):
@@ -73,7 +76,7 @@ class GetContentExecutor(Executor):
         self.credential = credential or AzureCliCredential()
         self.client = AzureOpenAIChatClient(
             credential=self.credential,
-            endpoint="https://hosted-agent-deployment.services.ai.azure.com"
+            endpoint=AZURE_ENDPOINT
         )
         self.agent = self.client.create_agent(
             instructions="""You are an agent that retrieves website content. 
@@ -112,7 +115,7 @@ class SummarizeContentExecutor(Executor):
         self.credential = credential or AzureCliCredential()
         self.client = AzureOpenAIChatClient(
             credential=self.credential,
-            endpoint="https://hosted-agent-deployment.services.ai.azure.com"
+            endpoint=AZURE_ENDPOINT
         )
         self.agent = self.client.create_agent(
             instructions="""You are an expert content summarizer. Your task is to:

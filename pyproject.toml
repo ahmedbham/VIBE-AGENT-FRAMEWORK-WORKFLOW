@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "joker-agent"
+version = "0.1.0"
+description = "Joker AI agent using Microsoft Agent Framework + Azure OpenAI (Foundry)"
+authors = []
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<4"
+agent-framework = {version = ">=1.0.0b0", allow-prereleases = true}
+azure-identity = "^1.17.0"
+openai = "^1.59.6"
+python-dotenv = "^1.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.0"
+
+[build-system]
+requires = ["poetry-core>=1.8.0"]
+build-backend = "poetry.core.masonry.api"

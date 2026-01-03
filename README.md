@@ -10,6 +10,13 @@ Python agent named **Joker** with system instructions: "you are good at telling 
 ### 2. Weather Agent (Function Calling)
 Python agent that demonstrates **function calling** capabilities using the `AzureOpenAIChatClient`. It includes a `get-weather` function tool that can be invoked by the agent to provide weather information for any location.
 
+### 3. Website Summarizer Workflow (Multi-Agent with WorkflowBuilder)
+A **multi-agent workflow** built with Microsoft Agent Framework's **WorkflowBuilder** that demonstrates advanced agent orchestration. This workflow uses the Executor pattern with two specialized executors:
+- **Get Content Executor**: Fetches and extracts text content from a website URL using web scraping tools
+- **Summarize Content Executor**: Processes the content and generates a concise bulleted list summary
+
+The workflow uses `WorkflowBuilder` to register executors, define edges, and orchestrate the sequential execution. Data flows from one executor to the next via `WorkflowContext`.
+
 ## Prerequisites
 - Python >= 3.1.10
 - Poetry
@@ -63,6 +70,15 @@ poetry run python -m joker_agent.run_weather_agent
 ```
 This demonstrates function calling with the `get-weather` tool that returns: "The weather in {location} is cloudy with a high of 15°C."
 
+## Run the Website Summarizer Workflow (Multi-Agent with WorkflowBuilder)
+```bash
+poetry run python -m joker_agent.run_website_summarizer
+```
+This demonstrates a multi-agent workflow built with **WorkflowBuilder** where:
+1. The **Get Content Executor** fetches website content from a URL
+2. The **Summarize Content Executor** creates a concise bulleted summary
+3. The `WorkflowBuilder` orchestrates the executors with edges and manages data flow via `WorkflowContext`
+
 ## Documentation
 
 ### Quick Start
@@ -70,6 +86,7 @@ This demonstrates function calling with the `get-weather` tool that returns: "Th
 
 ### Comprehensive Guides
 - **[WEATHER_AGENT_PLAN.md](WEATHER_AGENT_PLAN.md)** - Detailed plan for implementing agents with function calling
+- **[WEBSITE_SUMMARIZER_PLAN.md](WEBSITE_SUMMARIZER_PLAN.md)** - Detailed plan for implementing multi-agent workflows
 - **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Summary of the implementation and architecture
 - **[examples/README.md](examples/README.md)** - Example scripts and usage patterns
 

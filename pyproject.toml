@@ -11,6 +11,9 @@ agent-framework = {version = ">=1.0.0b0", allow-prereleases = true}
 azure-identity = "^1.17.0"
 openai = "^1.59.6"
 python-dotenv = "^1.0.1"
+requests = "^2.31.0"
+beautifulsoup4 = "^4.12.0"
+lxml = "^5.1.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.0"

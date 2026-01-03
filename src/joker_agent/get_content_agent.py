@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+# Maximum content length to avoid token limits
+MAX_CONTENT_LENGTH = 8000
+
 SYSTEM_PROMPT = """You are an agent that retrieves website content. 
 When given a URL, use the get_website_content tool to fetch the content and return it.
 Extract and return the main text content from the website."""
@@ -25,7 +28,7 @@ def get_website_content(url: str) -> str:
     try:
         # Set a user-agent to avoid being blocked
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
         
         # Fetch the webpage with timeout
@@ -47,9 +50,9 @@ def get_website_content(url: str) -> str:
         chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
         text = ' '.join(chunk for chunk in chunks if chunk)
         
-        # Limit content length to avoid token limits (approximately 8000 characters)
-        if len(text) > 8000:
-            text = text[:8000] + "... (content truncated)"
+        # Limit content length to avoid token limits
+        if len(text) > MAX_CONTENT_LENGTH:
+            text = text[:MAX_CONTENT_LENGTH] + "... (content truncated)"
         
         return text
     

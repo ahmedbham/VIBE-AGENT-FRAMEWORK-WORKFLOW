@@ -1,6 +1,14 @@
-# Joker Agent (Microsoft Agent Framework + Azure OpenAI Foundry)
+# VIBE Agent Framework Workflow
 
+This repository contains example agents built with Microsoft Agent Framework and Azure OpenAI Foundry, demonstrating various capabilities including basic chat and function calling.
+
+## Agents
+
+### 1. Joker Agent
 Python agent named **Joker** with system instructions: "you are good at telling jokes". It uses Azure OpenAI deployed in a Microsoft Foundry project and authenticates via Azure CLI login (AzureCliCredential).
+
+### 2. Weather Agent (Function Calling)
+Python agent that demonstrates **function calling** capabilities using the `AzureOpenAIChatClient`. It includes a `get-weather` function tool that can be invoked by the agent to provide weather information for any location.
 
 ## Prerequisites
 - Python >= 3.1.10
@@ -48,6 +56,22 @@ poetry install
 poetry run python -m joker_agent.run
 ```
 The runner sends: "Tell me a joke about a pirate".
+
+## Run the Weather agent (Function Calling Demo)
+```bash
+poetry run python -m joker_agent.run_weather_agent
+```
+This demonstrates function calling with the `get-weather` tool that returns: "The weather in {location} is cloudy with a high of 15°C."
+
+## Documentation
+
+### Quick Start
+- **[QUICKSTART.md](QUICKSTART.md)** - Get started quickly with examples and common patterns
+
+### Comprehensive Guides
+- **[WEATHER_AGENT_PLAN.md](WEATHER_AGENT_PLAN.md)** - Detailed plan for implementing agents with function calling
+- **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Summary of the implementation and architecture
+- **[examples/README.md](examples/README.md)** - Example scripts and usage patterns
 
 ## Notes
 - If the `microsoft-agentframework` package name/version differs, update `pyproject.toml` accordingly.

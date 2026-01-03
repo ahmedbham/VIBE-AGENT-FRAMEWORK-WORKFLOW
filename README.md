@@ -63,8 +63,15 @@ poetry run python -m joker_agent.run_weather_agent
 ```
 This demonstrates function calling with the `get-weather` tool that returns: "The weather in {location} is cloudy with a high of 15°C."
 
-## Detailed Documentation
-- See [WEATHER_AGENT_PLAN.md](WEATHER_AGENT_PLAN.md) for a comprehensive guide on implementing agents with function calling capabilities
+## Documentation
+
+### Quick Start
+- **[QUICKSTART.md](QUICKSTART.md)** - Get started quickly with examples and common patterns
+
+### Comprehensive Guides
+- **[WEATHER_AGENT_PLAN.md](WEATHER_AGENT_PLAN.md)** - Detailed plan for implementing agents with function calling
+- **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Summary of the implementation and architecture
+- **[examples/README.md](examples/README.md)** - Example scripts and usage patterns
 
 ## Notes
 - If the `microsoft-agentframework` package name/version differs, update `pyproject.toml` accordingly.

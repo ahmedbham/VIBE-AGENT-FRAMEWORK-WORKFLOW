@@ -79,6 +79,39 @@ This demonstrates a multi-agent workflow built with **WorkflowBuilder** where:
 2. The **Summarize Content Executor** creates a concise bulleted summary
 3. The `WorkflowBuilder` orchestrates the executors with edges and manages data flow via `WorkflowContext`
 
+## Deployment to Azure Container Apps
+
+The Website Summarizer Workflow can be deployed to Azure Container Apps using two approaches:
+
+### 1. GitHub Actions (Automated CI/CD)
+Push to the main branch or manually trigger the deployment workflow. The application will be automatically built, containerized, and deployed to Azure.
+
+```bash
+# Deployment happens automatically on git push to main
+git push origin main
+
+# Or trigger manually via GitHub Actions UI
+```
+
+### 2. Azure Developer CLI (azd)
+Use azd for command-line deployment with simple commands:
+
+```bash
+# First-time setup
+azd auth login
+azd init
+
+# Set required environment variables
+azd env set FOUNDRY_ENDPOINT "https://your-foundry.services.ai.azure.com"
+azd env set AZURE_OPENAI_DEPLOYMENT "gpt-4.1-mini"
+azd env set AZURE_OPENAI_API_VERSION "2024-10-21"
+
+# Deploy everything (infrastructure + application)
+azd up
+```
+
+For detailed deployment instructions, see the [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md).
+
 ## Documentation
 
 ### Quick Start
@@ -89,6 +122,11 @@ This demonstrates a multi-agent workflow built with **WorkflowBuilder** where:
 - **[WEBSITE_SUMMARIZER_PLAN.md](WEBSITE_SUMMARIZER_PLAN.md)** - Detailed plan for implementing multi-agent workflows
 - **[IMPLEMENTATION_SUMMARY.md](IMPLEMENTATION_SUMMARY.md)** - Summary of the implementation and architecture
 - **[examples/README.md](examples/README.md)** - Example scripts and usage patterns
+
+### Deployment to Azure
+- **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** - Complete guide for deploying to Azure Container Apps
+- **[ACA_DEPLOYMENT_QUICKREF.md](ACA_DEPLOYMENT_QUICKREF.md)** - Quick reference for Azure Container Apps deployment
+- **[ACA_DEPLOYMENT_IMPLEMENTATION.md](ACA_DEPLOYMENT_IMPLEMENTATION.md)** - Implementation summary and technical details
 
 ## Notes
 - If the `microsoft-agentframework` package name/version differs, update `pyproject.toml` accordingly.

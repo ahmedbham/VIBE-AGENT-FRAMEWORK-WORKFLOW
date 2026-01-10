@@ -89,3 +89,11 @@ target/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Azure Developer CLI
+.azure/
+
+# Bicep compiled ARM templates (generated from .bicep files)
+infra/**/*.json
+!infra/abbreviations.json
+!infra/main.parameters.json

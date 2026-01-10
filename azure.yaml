@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: vibe-agent-framework-workflow
+metadata:
+  template: vibe-agent-framework-workflow@0.0.1-beta
+
+services:
+  website-summarizer:
+    project: .
+    language: python
+    host: containerapp
+    docker:
+      path: ./Dockerfile
+      context: .
+
+hooks:
+  preprovision:
+    posix:
+      shell: sh
+      run: |
+        echo "Preparing to provision Azure resources..."
+    windows:
+      shell: pwsh
+      run: |
+        Write-Host "Preparing to provision Azure resources..."
+  
+  postprovision:
+    posix:
+      shell: sh
+      run: |
+        echo "Azure resources provisioned successfully"
+        echo "Container Registry: $AZURE_CONTAINER_REGISTRY_ENDPOINT"
+        echo "Container App: $WEBSITE_SUMMARIZER_APP_URL"
+    windows:
+      shell: pwsh
+      run: |
+        Write-Host "Azure resources provisioned successfully"
+        Write-Host "Container Registry: $env:AZURE_CONTAINER_REGISTRY_ENDPOINT"
+        Write-Host "Container App: $env:WEBSITE_SUMMARIZER_APP_URL"

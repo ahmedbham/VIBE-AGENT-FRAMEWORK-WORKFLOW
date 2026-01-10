@@ -89,3 +89,6 @@ target/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Azure Developer CLI
+.azure/

@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y \
 # Install Poetry (align with lockfile generator)
 RUN pip install --no-cache-dir poetry==2.2.1
 
-# Copy Poetry configuration files
-COPY pyproject.toml poetry.lock ./
+# Copy Poetry configuration files and README
+COPY pyproject.toml poetry.lock README.md ./
 
 # Configure Poetry to not create virtual environments (since we're in a container)
 RUN poetry config virtualenvs.create false

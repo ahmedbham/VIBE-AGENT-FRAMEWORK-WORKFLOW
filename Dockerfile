@@ -22,12 +22,15 @@ COPY pyproject.toml poetry.lock README.md ./
 # Configure Poetry to not create virtual environments (since we're in a container)
 RUN poetry config virtualenvs.create false
 
-# Install dependencies
-RUN poetry install --only main --no-interaction --no-ansi
+# Install dependencies only (without the project itself)
+RUN poetry install --only main --no-root --no-interaction --no-ansi
 
 # Copy application source code
 COPY src/ ./src/
 COPY .env.example .env.example
+
+# Install the project itself now that source code is available
+RUN poetry install --only-root --no-interaction --no-ansi
 
 # Set Python path
 ENV PYTHONPATH=/app

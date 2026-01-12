@@ -16,7 +16,7 @@ async def main() -> None:
     
     # Example URLs to demonstrate the workflow
     test_urls = [
-        "https://example.com",  # Simple example site
+        "https://google.com",  # Simple example site
         # Add more URLs as needed for testing
     ]
     

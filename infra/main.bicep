@@ -94,6 +94,10 @@ module websiteSummarizerApp './modules/container-app.bicep' = {
         value: azureOpenAIDeployment
       }
       {
+        name: 'AZURE_OPENAI_CHAT_DEPLOYMENT_NAME'
+        value: azureOpenAIDeployment
+      }
+      {
         name: 'AZURE_OPENAI_API_VERSION'
         value: azureOpenAIApiVersion
       }

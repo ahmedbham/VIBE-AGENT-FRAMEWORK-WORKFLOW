@@ -24,6 +24,7 @@ azd init
 # 3. Set required environment variables
 azd env set FOUNDRY_ENDPOINT "https://your-foundry.services.ai.azure.com"
 azd env set AZURE_OPENAI_DEPLOYMENT "gpt-4.1-mini"
+azd env set AZURE_OPENAI_CHAT_DEPLOYMENT_NAME "gpt-4.1-mini"
 azd env set AZURE_OPENAI_API_VERSION "2024-10-21"
 
 # 4. Deploy everything (infrastructure + app)
@@ -123,6 +124,7 @@ docker build -t website-summarizer:latest .
 docker run -it --rm \
   -e FOUNDRY_ENDPOINT="your-endpoint" \
   -e AZURE_OPENAI_DEPLOYMENT="gpt-4.1-mini" \
+  -e AZURE_OPENAI_CHAT_DEPLOYMENT_NAME="gpt-4.1-mini" \
   -e AZURE_OPENAI_API_VERSION="2024-10-21" \
   website-summarizer:latest
 
@@ -151,6 +153,7 @@ Required for the application:
 ```bash
 FOUNDRY_ENDPOINT=https://your-foundry.services.ai.azure.com
 AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini
+AZURE_OPENAI_CHAT_DEPLOYMENT_NAME=gpt-4.1-mini
 AZURE_OPENAI_API_VERSION=2024-10-21
 ```
 

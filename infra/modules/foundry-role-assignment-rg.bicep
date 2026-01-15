@@ -11,7 +11,7 @@ param foundryName string
 param roleDefinitionId string
 
 // Reference the existing Foundry workspace
-resource foundryProject 'Microsoft.MachineLearningServices/workspaces@2024-04-01' existing = {
+resource foundryProject 'Microsoft.MachineLearningServices/workspaces@2023-10-01' existing = {
   name: foundryName
 }
 

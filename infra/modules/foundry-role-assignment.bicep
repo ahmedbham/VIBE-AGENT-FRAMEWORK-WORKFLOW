@@ -8,7 +8,7 @@ param principalId string
 param foundryResourceId string
 
 @description('Role Definition ID for the role to assign. Default is Cognitive Services OpenAI User.')
-param roleDefinitionId string = '5a97b65f3-24c7-4388-baec-2e87135dc908' // Cognitive Services OpenAI User
+param roleDefinitionId string = '5a97b65f-24c7-4388-baec-2e87135dc908' // Cognitive Services OpenAI User
 
 // Parse resource group info from the Foundry resource ID
 var subscriptionId = split(foundryResourceId, '/')[2]

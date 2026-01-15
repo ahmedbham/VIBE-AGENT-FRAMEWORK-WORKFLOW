@@ -132,14 +132,14 @@ If the Foundry resource ID is not available during deployment or if you prefer t
    ```
    
    **Alternative role options**:
-   - `Cognitive Services OpenAI User` (5a97b65f3-24c7-4388-baec-2e87135dc908) - Read access for inference
+   - `Cognitive Services OpenAI User` (5a97b65f-24c7-4388-baec-2e87135dc908) - Read access for inference
    - `Cognitive Services OpenAI Contributor` (a001fd3d-188f-4b5d-821b-7da978bf7442) - Full access
    
    To use a specific role by ID:
    ```bash
    az role assignment create \
      --assignee $PRINCIPAL_ID \
-     --role "5a97b65f3-24c7-4388-baec-2e87135dc908" \
+     --role "5a97b65f-24c7-4388-baec-2e87135dc908" \
      --scope $FOUNDRY_RESOURCE_ID
    ```
 

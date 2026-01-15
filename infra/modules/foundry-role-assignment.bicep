@@ -11,6 +11,7 @@ param foundryResourceId string
 param roleDefinitionId string = '5a97b65f-24c7-4388-baec-2e87135dc908' // Cognitive Services OpenAI User
 
 // Parse resource group info from the Foundry resource ID
+// Expected format: /subscriptions/{subscription-id}/resourceGroups/{resource-group-name}/providers/{resource-provider}/{resource-type}/{resource-name}
 var subscriptionId = split(foundryResourceId, '/')[2]
 var resourceGroupName = split(foundryResourceId, '/')[4]
 var resourceName = split(foundryResourceId, '/')[8]

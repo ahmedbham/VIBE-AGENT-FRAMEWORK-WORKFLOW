@@ -1,6 +1,6 @@
 from typing import Optional
 from agent_framework.azure import AzureOpenAIChatClient
-from azure.identity import AzureCliCredential
+from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,13 +21,13 @@ Aim for 5-8 key points that capture the essence of the content."""
 class SummarizeContentAgent:
     """Agent that summarizes text content into a concise bulleted list."""
     
-    def __init__(self, *, credential: Optional[AzureCliCredential] = None) -> None:
+    def __init__(self, *, credential: Optional[DefaultAzureCredential] = None) -> None:
         """Initialize the Summarize Content Agent.
         
         Args:
-            credential: Azure credential for authentication. Defaults to AzureCliCredential.
+            credential: Azure credential for authentication. Defaults to DefaultAzureCredential.
         """
-        self.credential = credential or AzureCliCredential()
+        self.credential = credential or DefaultAzureCredential()
         # Initialize the Azure OpenAI Chat Client
         self.client = AzureOpenAIChatClient(
             credential=self.credential, 

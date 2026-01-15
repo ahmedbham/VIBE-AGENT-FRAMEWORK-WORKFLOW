@@ -1,7 +1,7 @@
 from typing import Optional
 import requests
 from bs4 import BeautifulSoup
-from azure.identity import AzureCliCredential
+from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
 from agent_framework import Executor, WorkflowBuilder, WorkflowContext, handler
 from agent_framework.azure import AzureOpenAIChatClient
@@ -65,15 +65,15 @@ def get_website_content(url: str) -> str:
 class GetContentExecutor(Executor):
     """Executor that retrieves website content from a given URL."""
     
-    def __init__(self, executor_id: str, credential: Optional[AzureCliCredential] = None):
+    def __init__(self, executor_id: str, credential: Optional[DefaultAzureCredential] = None):
         """Initialize the Get Content Executor.
         
         Args:
             executor_id: Unique identifier for this executor
-            credential: Azure credential for authentication. Defaults to AzureCliCredential.
+            credential: Azure credential for authentication. Defaults to DefaultAzureCredential.
         """
         super().__init__(id=executor_id)
-        self.credential = credential or AzureCliCredential()
+        self.credential = credential or DefaultAzureCredential()
         self.client = AzureOpenAIChatClient(
             credential=self.credential,
             endpoint=AZURE_ENDPOINT
@@ -104,15 +104,15 @@ Extract and return the main text content from the website.""",
 class SummarizeContentExecutor(Executor):
     """Executor that summarizes text content into a concise bulleted list."""
     
-    def __init__(self, executor_id: str, credential: Optional[AzureCliCredential] = None):
+    def __init__(self, executor_id: str, credential: Optional[DefaultAzureCredential] = None):
         """Initialize the Summarize Content Executor.
         
         Args:
             executor_id: Unique identifier for this executor
-            credential: Azure credential for authentication. Defaults to AzureCliCredential.
+            credential: Azure credential for authentication. Defaults to DefaultAzureCredential.
         """
         super().__init__(id=executor_id)
-        self.credential = credential or AzureCliCredential()
+        self.credential = credential or DefaultAzureCredential()
         self.client = AzureOpenAIChatClient(
             credential=self.credential,
             endpoint=AZURE_ENDPOINT
@@ -154,13 +154,13 @@ class WebsiteSummarizerWorkflow:
     2. Summarize Content Executor: Creates a concise bulleted summary
     """
     
-    def __init__(self, *, credential: Optional[AzureCliCredential] = None) -> None:
+    def __init__(self, *, credential: Optional[DefaultAzureCredential] = None) -> None:
         """Initialize the workflow with WorkflowBuilder.
         
         Args:
-            credential: Azure credential for authentication. Defaults to AzureCliCredential.
+            credential: Azure credential for authentication. Defaults to DefaultAzureCredential.
         """
-        self.credential = credential or AzureCliCredential()
+        self.credential = credential or DefaultAzureCredential()
         
         # Build the workflow using WorkflowBuilder
         self.workflow = (

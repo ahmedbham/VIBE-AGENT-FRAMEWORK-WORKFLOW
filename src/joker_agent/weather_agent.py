@@ -2,7 +2,7 @@ from typing import Optional
 import os
 
 from agent_framework.azure import AzureOpenAIChatClient
-from azure.identity import AzureCliCredential
+from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -24,13 +24,13 @@ def get_weather(location: str) -> str:
 
 
 class WeatherAgent:
-    def __init__(self, *, credential: Optional[AzureCliCredential] = None) -> None:
+    def __init__(self, *, credential: Optional[DefaultAzureCredential] = None) -> None:
         """Initialize the Weather Agent with function calling capability.
         
         Args:
-            credential: Azure credential for authentication. Defaults to AzureCliCredential.
+            credential: Azure credential for authentication. Defaults to DefaultAzureCredential.
         """
-        self.credential = credential or AzureCliCredential()
+        self.credential = credential or DefaultAzureCredential()
         # Initialize the Azure OpenAI Chat Client
         self.client = AzureOpenAIChatClient(
             credential=self.credential, 

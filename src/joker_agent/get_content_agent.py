@@ -2,7 +2,7 @@ from typing import Optional
 import requests
 from bs4 import BeautifulSoup
 from agent_framework.azure import AzureOpenAIChatClient
-from azure.identity import AzureCliCredential
+from azure.identity import DefaultAzureCredential
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -65,13 +65,13 @@ def get_website_content(url: str) -> str:
 class GetContentAgent:
     """Agent that retrieves website content from a given URL."""
     
-    def __init__(self, *, credential: Optional[AzureCliCredential] = None) -> None:
+    def __init__(self, *, credential: Optional[DefaultAzureCredential] = None) -> None:
         """Initialize the Get Content Agent with web scraping capability.
         
         Args:
-            credential: Azure credential for authentication. Defaults to AzureCliCredential.
+            credential: Azure credential for authentication. Defaults to DefaultAzureCredential.
         """
-        self.credential = credential or AzureCliCredential()
+        self.credential = credential or DefaultAzureCredential()
         # Initialize the Azure OpenAI Chat Client
         self.client = AzureOpenAIChatClient(
             credential=self.credential, 

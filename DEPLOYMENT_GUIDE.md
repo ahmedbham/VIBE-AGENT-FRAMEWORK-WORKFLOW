@@ -449,7 +449,36 @@ az containerapp ingress update \
 
 ### Authentication
 
-The application uses Azure Managed Identity for authentication to Azure OpenAI/Foundry. After deployment:
+The application uses Azure Managed Identity for authentication to Azure OpenAI/Foundry.
+
+#### Automated Configuration (Recommended)
+
+To automatically grant the necessary permissions during deployment, set the `FOUNDRY_RESOURCE_ID` environment variable:
+
+```bash
+# Get your Foundry resource ID
+FOUNDRY_RESOURCE_ID=$(az ml workspace show \
+  --name <your-foundry-name> \
+  --resource-group <foundry-resource-group> \
+  --query id -o tsv)
+
+# For azd deployment
+azd env set FOUNDRY_RESOURCE_ID "$FOUNDRY_RESOURCE_ID"
+azd provision  # or azd up
+
+# For Azure CLI deployment
+az deployment sub create \
+  --location <location> \
+  --template-file infra/main.bicep \
+  --parameters infra/main.parameters.json \
+  --parameters foundryResourceId="$FOUNDRY_RESOURCE_ID"
+```
+
+The Bicep template will automatically grant the "Cognitive Services OpenAI User" role to the container app's managed identity.
+
+#### Manual Configuration (Post-Deployment)
+
+If you prefer to grant permissions after deployment, or if you didn't set `FOUNDRY_RESOURCE_ID` during deployment:
 
 1. **Get the Managed Identity Principal ID**:
    ```bash
@@ -459,16 +488,22 @@ The application uses Azure Managed Identity for authentication to Azure OpenAI/F
      --query identity.principalId -o tsv)
    ```
 
-2. **Grant permissions to Azure OpenAI**:
+2. **Grant permissions to Azure AI Foundry**:
    ```bash
-   # Replace with your Azure OpenAI resource ID
-   OPENAI_RESOURCE_ID="/subscriptions/<sub-id>/resourceGroups/<rg>/providers/Microsoft.CognitiveServices/accounts/<name>"
+   # Get your Foundry resource ID
+   FOUNDRY_RESOURCE_ID=$(az ml workspace show \
+     --name <your-foundry-name> \
+     --resource-group <foundry-resource-group> \
+     --query id -o tsv)
    
+   # Grant the role
    az role assignment create \
      --assignee $PRINCIPAL_ID \
      --role "Cognitive Services OpenAI User" \
-     --scope $OPENAI_RESOURCE_ID
+     --scope $FOUNDRY_RESOURCE_ID
    ```
+
+For detailed manual configuration steps, including troubleshooting, see [MANUAL_CONFIGURATION_STEPS.md](MANUAL_CONFIGURATION_STEPS.md).
 
 ## Verification
 

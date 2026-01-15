@@ -16,6 +16,9 @@ param containerImageName string = ''
 @description('Azure OpenAI Foundry Endpoint')
 param foundryEndpoint string
 
+@description('Azure OpenAI Foundry Resource ID (optional). If provided, grants the container app managed identity access to the Foundry project.')
+param foundryResourceId string = ''
+
 @description('Azure OpenAI Deployment Name')
 param azureOpenAIDeployment string = 'gpt-4.1-mini'
 
@@ -106,6 +109,17 @@ module websiteSummarizerApp './modules/container-app.bicep' = {
   }
 }
 
+// Role Assignment for Container App Managed Identity to access Foundry (optional)
+// This module is deployed at subscription scope
+module foundryRoleAssignment './modules/foundry-role-assignment.bicep' = if (!empty(foundryResourceId)) {
+  name: 'foundry-role-assignment'
+  scope: subscription()
+  params: {
+    principalId: websiteSummarizerApp.outputs.identityPrincipalId
+    foundryResourceId: foundryResourceId
+  }
+}
+
 // Outputs
 output AZURE_LOCATION string = location
 output AZURE_RESOURCE_GROUP string = rg.name
@@ -114,3 +128,4 @@ output AZURE_CONTAINER_REGISTRY_NAME string = containerRegistry.outputs.name
 output AZURE_CONTAINER_APPS_ENVIRONMENT_ID string = containerAppsEnvironment.outputs.id
 output WEBSITE_SUMMARIZER_APP_NAME string = websiteSummarizerApp.outputs.name
 output WEBSITE_SUMMARIZER_APP_URL string = websiteSummarizerApp.outputs.uri
+output WEBSITE_SUMMARIZER_IDENTITY_PRINCIPAL_ID string = websiteSummarizerApp.outputs.identityPrincipalId

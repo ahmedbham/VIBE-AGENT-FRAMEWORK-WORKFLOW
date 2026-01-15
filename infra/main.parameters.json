@@ -11,6 +11,9 @@
     "foundryEndpoint": {
       "value": "${FOUNDRY_ENDPOINT}"
     },
+    "foundryResourceId": {
+      "value": "${FOUNDRY_RESOURCE_ID=}"
+    },
     "azureOpenAIDeployment": {
       "value": "${AZURE_OPENAI_DEPLOYMENT=gpt-4.1-mini}"
     },

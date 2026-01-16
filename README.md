@@ -106,9 +106,18 @@ azd env set FOUNDRY_ENDPOINT "https://your-foundry.services.ai.azure.com"
 azd env set AZURE_OPENAI_DEPLOYMENT "gpt-4.1-mini"
 azd env set AZURE_OPENAI_API_VERSION "2024-10-21"
 
+# Optional: Set Foundry Resource ID for automatic role assignment
+# Get your Foundry resource ID first:
+# az ml workspace show --name <your-foundry-name> --resource-group <foundry-rg> --query id -o tsv
+azd env set FOUNDRY_RESOURCE_ID "/subscriptions/<sub-id>/resourceGroups/<rg>/providers/Microsoft.MachineLearningServices/workspaces/<name>"
+
 # Deploy everything (infrastructure + application)
 azd up
 ```
+
+**Important**: After deployment, the container app's managed identity needs permission to access your Foundry project. This can be configured:
+- **Automatically**: Set `FOUNDRY_RESOURCE_ID` before deployment (shown above)
+- **Manually**: Follow the steps in [MANUAL_CONFIGURATION_STEPS.md](MANUAL_CONFIGURATION_STEPS.md)
 
 For detailed deployment instructions, see the [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md).
 
